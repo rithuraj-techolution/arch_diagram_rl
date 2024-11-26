@@ -57,7 +57,6 @@ def predict():
         res = upload_to_rlef(Enums.RL_OPTIMIZED_MODEL_ID.value, optimized_image_temp_path, optimized_json, project_name, model_name, prediction_uid)
 
         return jsonify({"optimized_json" : optimized_json}), 200
-        # return optimized_json
     else:
         optimized_json = predict_model(model, env)
 
@@ -66,8 +65,33 @@ def predict():
         cv2.imwrite(optimized_image_temp_path, optimized_image)
         print(optimized_image.shape)
         res = upload_to_rlef(Enums.RL_OPTIMIZED_MODEL_ID.value, optimized_image_temp_path, optimized_json, project_name, model_name)
+        
+        if res == 200:
+            print("Optimized Image uploaded to RLEF successfully")
+        else:
+            print("Optimized Image upload to RLEF failed")
 
         return jsonify({"optimized_json" : optimized_json}), 200
+
+@app.route("/send_feedback", methods=['POST'])
+def send_feedback():
+    data = request.get_json()
+    project_name = data.get("project_name", None)
+    model_name = data.get("model_name", None)
+    env_name = data.get("environment_name", None)
+    feedback_json = data.get("feedback_json", None)
+
+    prediction_uid = uuid.uuid4()[:4]
+    
+    feedback_image = get_image(feedback_json)
+    feedback_image_temp_path = os.path.join(Enums.TEMP_DATA_DIRECTORY.value, "feedback_image.jpg")
+    cv2.imwrite(feedback_image_temp_path, feedback_image)
+    res = upload_to_rlef(Enums.FEEDBACK_MODEL_ID.value, feedback_image_temp_path, feedback_json, project_name, model_name, prediction_uid)
+
+    if res == 200:
+        return jsonify({"status" : "Feedback sent successfully"}), 200
+    else:
+        return jsonify({"error" : "Feedback sending failed"}), 400
 
 app.run(host="0.0.0.0", port=5000, debug=True)
         
