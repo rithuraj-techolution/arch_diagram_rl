@@ -1,0 +1,5 @@
+{
+    "input": {"x": 20, "y": 70, "width": 70, "height": 300},
+    "compute": {"x": 100, "y": 70, "width": 510, "height": 300},
+    "output": {"x": 620, "y": 70, "width": 70, "height": 300}
+}
